@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Category Details</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <header class="bg-white shadow p-4 mb-6">
+    <h1 class="text-2xl font-bold">Category: {{ category.name }}</h1>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4">
+
+    {% if events %}
+    <div class="bg-white p-6 rounded shadow">
+      <h2 class="text-xl font-bold mb-4">Events in this Category</h2>
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50 text-gray-500 uppercase text-sm">
+            <th class="px-4 py-2 border">Event Name</th>
+            <th class="px-4 py-2 border">Date</th>
+            <th class="px-4 py-2 border">Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2 border">{{ event.name }}</td>
+            <td class="px-4 py-2 border">{{ event.date }}</td>
+            <td class="px-4 py-2 border">{{ event.location }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-gray-500 mt-4">No events available in this category.</p>
+    {% endif %}
+
+  </div>
+</body>
+</html>

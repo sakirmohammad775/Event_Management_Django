@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <header class="bg-white shadow p-4 mb-6">
+    <h1 class="text-2xl font-bold">Events</h1>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4">
+
+    {% if events %}
+    <table class="w-full bg-white rounded shadow text-left border-collapse">
+      <thead class="bg-gray-50 text-gray-500 uppercase text-sm">
+        <tr>
+          <th class="px-4 py-2 border">Name</th>
+          <th class="px-4 py-2 border">Date</th>
+          <th class="px-4 py-2 border">Location</th>
+          <th class="px-4 py-2 border">Category</th>
+          <th class="px-4 py-2 border">RSVP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2 border">
+            <a href="{% url 'event-detail' event.id %}" class="text-blue-600 hover:underline">{{ event.name }}</a>
+          </td>
+          <td class="px-4 py-2 border">{{ event.date }}</td>
+          <td class="px-4 py-2 border">{{ event.location }}</td>
+          <td class="px-4 py-2 border">{{ event.category.name }}</td>
+          <td class="px-4 py-2 border">
+            <a href="{% url 'event-rsvp' event.id %}" class="text-green-600 hover:underline">RSVP</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-gray-500 text-center mt-6">No events found.</p>
+    {% endif %}
+
+  </div>
+
+</body>
+</html>
