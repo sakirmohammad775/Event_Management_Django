@@ -16,20 +16,27 @@ def home(request):
 
 def organizer_dashboard(request):
     today = timezone.now().date()
-    
+
+    # Stats
     total_events = Event.objects.count()
     total_participants = RSVP.objects.count()
     upcoming_events = Event.objects.filter(date__gt=today).count()
     past_events = Event.objects.filter(date__lt=today).count()
     todays_events = Event.objects.filter(date=today)
+
+    # ✅ All events (no filtering by user)
+    events = Event.objects.select_related('category').all()
+
     context = {
         'total_events': total_events,
         'total_participants': total_participants,
         'upcoming_events': upcoming_events,
         'past_events': past_events,
         'todays_events': todays_events,
+        'events': events,   # Must pass events here
     }
     return render(request, 'dashboard/organizer_dashboard.html', context)
+
 
 def participant_dashboard(request):
     user = request.user

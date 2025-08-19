@@ -2,9 +2,10 @@
 
 {% block title %}Organizer Dashboard{% endblock title %}
 
-{% block tasks %}
+{% block event %}
 <div class="overflow-x-auto rounded-xl shadow-sm bg-white mb-5">
-  <h2 class="text-2xl font-semibold mb-4 px-4 pt-4">My Events</h2>
+  <h2 class="text-2xl font-semibold mb-4 px-4 pt-4">All Events</h2>
+
   <table class="w-full table-fixed text-sm text-gray-600">
     <thead class="bg-gray-50 text-xs uppercase text-gray-400 border-b border-gray-200">
       <tr>
@@ -17,26 +18,32 @@
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
-      {% for event in events %}
-      <tr class="hover:bg-gray-50">
-        <td class="px-4 py-4 text-center font-medium">{{ forloop.counter }}</td>
-        <td class="px-4 py-4 text-left">
-          <a href="{% url 'event-detail' event.id %}" class="text-blue-600 hover:underline">{{ event.name }}</a>
-        </td>
-        <td class="px-4 py-4 text-center">{{ event.category.name }}</td>
-        <td class="px-4 py-4 text-center">{{ event.location }}</td>
-        <td class="px-4 py-4 text-center">{{ event.date }}</td>
-        <td class="px-4 py-4 text-center">
-          <a href="{% url 'event-update' event.id %}" class="text-sm text-yellow-600 hover:underline">Edit</a> |
-          <a href="{% url 'event-delete' event.id %}" class="text-sm text-red-600 hover:underline">Delete</a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="6" class="text-center py-4 text-gray-500">No events created yet.</td>
-      </tr>
-      {% endfor %}
+      {% if events %}
+        {% for event in events %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-4 text-center font-medium">{{ forloop.counter }}</td>
+          <td class="px-4 py-4 text-left">
+            <a href="{% url 'event-detail' event.id %}" class="text-blue-600 hover:underline">
+              {{ event.name }}
+            </a>
+          </td>
+          <td class="px-4 py-4 text-center">{{ event.category.name }}</td>
+          <td class="px-4 py-4 text-center">{{ event.location }}</td>
+          <td class="px-4 py-4 text-center">{{ event.date|date:"M d, Y" }}</td>
+          <td class="px-4 py-4 text-center space-x-2">
+            <a href="{% url 'event-update' event.id %}" class="text-sm text-yellow-600 hover:underline">Edit</a>
+            <a href="{% url 'event-delete' event.id %}" class="text-sm text-red-600 hover:underline">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+      {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-4 text-gray-500">
+            No events available.
+          </td>
+        </tr>
+      {% endif %}
     </tbody>
   </table>
 </div>
-{% endblock tasks %}
+{% endblock event %}

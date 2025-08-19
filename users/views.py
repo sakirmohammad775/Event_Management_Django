@@ -1,28 +1,39 @@
-from django.contrib.auth.models import User, Group
-from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, permission_required
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.template.loader import render_to_string
-from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
 from django.core.mail import send_mail
-from django.conf import settings
 from django.contrib import messages
+from django.conf import settings
+from django.db.models import Prefetch
 from django.http import HttpResponse
+
+# ----------------------------
+# Helper: Admin check
+# ----------------------------
+def is_admin(user):
+    return user.groups.filter(name='Admin').exists()
 
 # ----------------------------
 # Signup with Email Activation
 # ----------------------------
 def signup_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        email = request.POST['email']
-        password = request.POST['password']
-        password2 = request.POST['password2']
-        first_name = request.POST['first_name']
-        last_name = request.POST['last_name']
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+
+        if not all([username, email, password, password2, first_name, last_name]):
+            messages.error(request, "All fields are required")
+            return redirect('signup')
 
         if password != password2:
             messages.error(request, "Passwords do not match")
@@ -32,87 +43,89 @@ def signup_view(request):
             messages.error(request, "Username already taken")
             return redirect('signup')
 
+        # Create user inactive
         user = User.objects.create_user(
-            username=username, email=email, password=password,
-            first_name=first_name, last_name=last_name, is_active=False
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            is_active=False
         )
 
-        # Assign Participant role by default
-        group, created = Group.objects.get_or_create(name='Participant')
+        # Assign Participant group by default
+        group, _ = Group.objects.get_or_create(name='Participant')
         user.groups.add(group)
 
-        # Send Activation Email
+        # Send activation email
         current_site = get_current_site(request)
+        token = default_token_generator.make_token(user)
+        activation_link = f"http://{current_site.domain}/users/activate/{user.id}/{token}/"
+
         subject = "Activate Your Account"
-        message = render_to_string('registration/activation_email.html', {
+        message = render_to_string('registration/account_activation_email.html', {
             'user': user,
-            'domain': current_site.domain,
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'token': default_token_generator.make_token(user)
+            'activation_link': activation_link
         })
+
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
-        messages.success(request, "Account created. Check your email to activate.")
-        return redirect('login')
+
+        messages.success(request, "Account created. Check your email to activate your account.")
+        return redirect('sign-in')
 
     return render(request, 'registration/signup.html')
+
 
 
 # ----------------------------
 # Activate Account
 # ----------------------------
-def activate_account(request, uidb64, token):
+def activate_user(request, user_id, token):
     try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-
-    if user is not None and default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        messages.success(request, "Account activated. You can now log in.")
-        return redirect('login')
-    else:
-        messages.error(request, "Activation link is invalid or expired.")
-        return redirect('home')
+        user = User.objects.get(id=user_id)
+        if default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return redirect('sign-in')  # Redirect to login after activation
+        else:
+            return HttpResponse("Invalid ID or token")
+    except User.DoesNotExist:
+        return HttpResponse("User not found")
 
 
 # ----------------------------
-# Login View
+# Login
 # ----------------------------
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
-        if user:
-            if user.is_active:
-                login(request, user)
-                return redirect('redirect-dashboard')
-            else:
-                messages.warning(request, "Account not activated. Check your email.")
+        if user and user.is_active:
+            login(request, user)
+            return redirect('redirect-dashboard')
         else:
-            messages.error(request, "Invalid username or password.")
+            messages.error(request, "Invalid credentials or inactive account.")
     return render(request, 'registration/login.html')
 
 
 # ----------------------------
-# Logout View
+# Logout
 # ----------------------------
 @login_required
 def logout_view(request):
     logout(request)
-    messages.success(request, "Logged out successfully.")
+    messages.success(request, "You have logged out.")
     return redirect('login')
 
 
 # ----------------------------
-# Redirect to Dashboard Based on Role
+# Role-based Redirection
 # ----------------------------
 @login_required
 def redirect_dashboard(request):
     user = request.user
-    if user.is_superuser:
+    if user.is_superuser or is_admin(user):
         return redirect('admin-dashboard')
     elif user.groups.filter(name='Organizer').exists():
         return redirect('organizer-dashboard')
@@ -121,17 +134,57 @@ def redirect_dashboard(request):
 
 
 # ----------------------------
-# Admin Only: Assign Role to User
+# Admin Dashboard View
 # ----------------------------
-@login_required
-@permission_required('auth.change_group', raise_exception=True)
+@user_passes_test(is_admin, login_url='no-permission')
+def admin_dashboard(request):
+    users = User.objects.prefetch_related(
+        Prefetch('groups', queryset=Group.objects.all(), to_attr='all_groups')
+    ).all()
+
+    for user in users:
+        user.group_name = user.all_groups[0].name if user.all_groups else "No Group Assigned"
+
+    return render(request, 'admin/dashboard.html', {'users': users})
+
+
+# ----------------------------
+# Assign Role to User
+# ----------------------------
+@user_passes_test(is_admin, login_url='no-permission')
 def assign_role(request, user_id):
     user = get_object_or_404(User, id=user_id)
-    if request.method == "POST":
-        role = request.POST.get('role')
-        group, created = Group.objects.get_or_create(name=role)
+    if request.method == 'POST':
+        role_name = request.POST.get('role')
+        group = Group.objects.get(name=role_name)
         user.groups.clear()
         user.groups.add(group)
-        messages.success(request, f"{user.username} is now assigned to {role}.")
-        return redirect('user-list')
+        messages.success(request, f"{user.username} assigned to {role_name}.")
+        return redirect('admin-dashboard')
     return render(request, 'admin/assign_role.html', {'user': user})
+
+
+# ----------------------------
+# Create Group
+# ----------------------------
+@user_passes_test(is_admin, login_url='no-permission')
+def create_group(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            group, created = Group.objects.get_or_create(name=name)
+            if created:
+                messages.success(request, f"Group '{name}' created successfully.")
+            else:
+                messages.warning(request, f"Group '{name}' already exists.")
+            return redirect('create-group')
+    return render(request, 'admin/create_group.html')
+
+
+# ----------------------------
+# List Groups
+# ----------------------------
+@user_passes_test(is_admin, login_url='no-permission')
+def group_list(request):
+    groups = Group.objects.all().prefetch_related('permissions')
+    return render(request, 'admin/group_list.html', {'groups': groups})

@@ -1,0 +1,41 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6">Groups and Permissions</h2>
+
+  {% if groups %}
+    <div class="overflow-x-auto">
+      <table class="w-full table-auto border border-gray-300 rounded-lg">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="text-left px-4 py-2 border-b">Group Name</th>
+            <th class="text-left px-4 py-2 border-b">Permissions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in groups %}
+          <tr class="odd:bg-white even:bg-gray-50">
+            <td class="px-4 py-2 font-medium text-gray-700 border-b">
+              {{ group.name }}
+            </td>
+            <td class="px-4 py-2 text-sm text-gray-600 border-b">
+              {% if group.permissions.all %}
+                <ul class="list-disc list-inside space-y-1">
+                  {% for perm in group.permissions.all %}
+                    <li>{{ perm.name }} ({{ perm.codename }})</li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <span class="italic text-gray-500">No permissions assigned</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-gray-600 italic">No groups available.</p>
+  {% endif %}
+</div>
+{% endblock %}

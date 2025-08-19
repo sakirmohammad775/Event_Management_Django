@@ -1,0 +1,45 @@
+{% extends "dashboard.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+  <h2 class="text-2xl font-semibold mb-6 text-gray-800">Assign Role to User</h2>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- User Selection -->
+    <div>
+      <label for="user" class="block text-sm font-medium text-gray-700">Select User</label>
+      <select name="user" id="user" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        {% for user in users %}
+          <option value="{{ user.id }}">{{ user.username }} ({{ user.email }})</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Role Selection -->
+    <div>
+      <label for="role" class="block text-sm font-medium text-gray-700">Select Role</label>
+      <select name="role" id="role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+        {% for role in roles %}
+          <option value="{{ role.id }}">{{ role.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="pt-4">
+      <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+        Assign Role
+      </button>
+    </div>
+  </form>
+
+  {% if message %}
+    <div class="mt-4 p-3 bg-green-100 text-green-800 rounded shadow">
+      {{ message }}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

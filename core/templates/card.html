@@ -1,0 +1,21 @@
+<!-- <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    {% if event.image %}
+    <img src="{{ event.image.url }}" alt="{{ event.name }}" class="w-full h-48 object-cover">
+    {% endif %}
+    <div class="p-6">
+        <h2 class="text-xl font-semibold mb-2">{{ event.name }}</h2>
+        <p class="text-gray-500 mb-2">Category: {{ event.category.name }}</p>
+        <p class="text-gray-500 mb-2">Location: {{ event.location }}</p>
+        <p class="text-gray-500 mb-2">Date: {{ event.date }}</p>
+        <div class="mt-4 flex justify-between items-center">
+            <a href="{% url 'event-detail' event.id %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300">View Details</a>
+            {% if request.user.is_authenticated %}
+                {% if event.rsvp_set.filter(user=request.user).exists %}
+                    <span class="text-green-600 font-semibold">RSVP'd</span>
+                {% else %}
+                    <a href="{% url 'event-rsvp' event.id %}" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition duration-300">RSVP</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div> -->
