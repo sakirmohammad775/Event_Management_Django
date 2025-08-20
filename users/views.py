@@ -22,6 +22,7 @@ def is_admin(user):
 # ----------------------------
 # Signup with Email Activation
 # ----------------------------
+
 def signup_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -31,19 +32,18 @@ def signup_view(request):
         first_name = request.POST.get('first_name')
         last_name = request.POST.get('last_name')
 
+        # Basic validations
         if not all([username, email, password, password2, first_name, last_name]):
             messages.error(request, "All fields are required")
             return redirect('signup')
-
         if password != password2:
             messages.error(request, "Passwords do not match")
             return redirect('signup')
-
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username already taken")
             return redirect('signup')
 
-        # Create user inactive
+        # Create inactive user
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -53,27 +53,12 @@ def signup_view(request):
             is_active=False
         )
 
-        # Assign Participant group by default
-        group, _ = Group.objects.get_or_create(name='Participant')
-        user.groups.add(group)
-
-        # Send activation email
-        current_site = get_current_site(request)
-        token = default_token_generator.make_token(user)
-        activation_link = f"http://{current_site.domain}/users/activate/{user.id}/{token}/"
-
-        subject = "Activate Your Account"
-        message = render_to_string('registration/account_activation_email.html', {
-            'user': user,
-            'activation_link': activation_link
-        })
-
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
-
         messages.success(request, "Account created. Check your email to activate your account.")
-        return redirect('sign-in')
+        return redirect('login')
 
     return render(request, 'registration/signup.html')
+
+   
 
 
 
@@ -81,17 +66,12 @@ def signup_view(request):
 # Activate Account
 # ----------------------------
 def activate_user(request, user_id, token):
-    try:
-        user = User.objects.get(id=user_id)
-        if default_token_generator.check_token(user, token):
-            user.is_active = True
-            user.save()
-            return redirect('sign-in')  # Redirect to login after activation
-        else:
-            return HttpResponse("Invalid ID or token")
-    except User.DoesNotExist:
-        return HttpResponse("User not found")
-
+    user = get_object_or_404(User, id=user_id)
+    if default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return redirect("login")
+    return HttpResponse("Activation link is invalid or expired.")
 
 # ----------------------------
 # Login
