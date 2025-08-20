@@ -1,6 +1,6 @@
 from pathlib import Path
 from decouple import config
-
+import dj_database_url   ## for render deploy
 # ----------------------------
 # Base directory
 # ----------------------------
@@ -74,16 +74,27 @@ WSGI_APPLICATION = 'event_management.wsgi.application'
 # ----------------------------
 # Database (PostgreSQL)
 # ----------------------------
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': config('DB_NAME', default=''),
+#         'USER': config('DB_USER', default=''),
+#         'PASSWORD': config('DB_PASSWORD', default=''),
+#         'HOST': config('DB_HOST', default='localhost'),
+#         'PORT': config('DB_PORT', cast=int),
+#     }
+# }
+
+# Replace the SQLite DATABASES configuration with PostgreSQL:(render)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default=''),
-        'USER': config('DB_USER', default=''),
-        'PASSWORD': config('DB_PASSWORD', default=''),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', cast=int),
-    }
+    'default': dj_database_url.config(
+        # Replace this value with your local database's connection string.
+        default='postgresql://event_management_db_trj1_user:WW5Gh05r6TEdxUBRKpPFzPKo3DGybJhU@dpg-d2iunhre5dus73bejj0g-a.oregon-postgres.render.com/event_management_db_trj1',
+        conn_max_age=600
+    )
 }
+
+
 
 # ----------------------------
 # Internal IPs (debug toolbar etc.)
