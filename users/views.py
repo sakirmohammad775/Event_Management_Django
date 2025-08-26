@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.db.models import Prefetch
 from django.http import HttpResponse
+from .forms import AssignRoleForm
 
 # ----------------------------
 # Helper: Admin check
@@ -59,9 +60,6 @@ def signup_view(request):
     return render(request, 'registration/signup.html')
 
    
-
-
-
 # ----------------------------
 # Activate Account
 # ----------------------------
@@ -136,18 +134,22 @@ def admin_dashboard(request):
 # Assign Role to User
 # ----------------------------
 @user_passes_test(is_admin, login_url='no-permission')
-def assign_role(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-    if request.method == 'POST':
-        role_name = request.POST.get('role')
-        group = Group.objects.get(name=role_name)
-        user.groups.clear()
-        user.groups.add(group)
-        messages.success(request, f"{user.username} assigned to {role_name}.")
-        return redirect('admin-dashboard')
-    return render(request, 'admin/assign_role.html', {'user': user})
+def assign_role(request):
+    form = AssignRoleForm(request.POST or None)
+    message = ''
 
+    if request.method == 'POST' and form.is_valid():
+        user = form.cleaned_data['user']
+        role = form.cleaned_data['role']
+        user.groups.clear()  # remove existing groups if needed
+        user.groups.add(role)  # assign selected role
+        message = f"{user.username} has been assigned the role: {role.name}"
 
+    context = {
+        'form': form,
+        'message': message,
+    }
+    return render(request, 'assign_role.html', context)
 # ----------------------------
 # Create Group
 # ----------------------------
