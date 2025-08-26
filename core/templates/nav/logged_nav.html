@@ -6,16 +6,16 @@
             <div class="hidden md:flex space-x-4">
                 {% if request.user.is_authenticated %}
                 {% if 'Organizer' in user_groups %}
-                <a href="{% url 'organizer-dashboard' %}" class="text-xl font-bold">Organizer</a>
+                <a href="{% url 'organizer-dashboard' %}" class="text-xl font-bold">Organizer dashboard</a>
                 <a href="{% url 'event-create' %}" class="hover:text-gray-300">Create Event</a>
 
                 {% elif 'Participant' in user_groups %}
                 <a href="{% url 'participant-dashboard' %}" class="text-gray-600 hover:text-gray-800">My Events</a>
 
                 {% elif request.user.is_superuser %}
-                <a href="{% url 'admin-dashboard' %}" class="text-xl font-bold">Admin Panel</a>
+                <a href="{% url 'admin-dashboard' %}" class="text-xl font-bold">Admin Dashboard</a>
                 <a href="{% url 'create-group' %}" class="hover:text-gray-300">Groups</a>
-                <a href="{% url 'admin-dashboard' %}" class="hover:text-gray-300">Users</a>
+                <a href="{% url 'admin-dashboard' %}" class="hover:text-gray-300"> All Users</a>
                 {% endif %}
                 {% endif %}
             </div>

@@ -27,8 +27,9 @@ Thank you!
         except Exception as e:
             print(f"Failed to send email to {instance.email}: {str(e)}")
 
-def assign_default_group(sender, instance, created, **kwargs):
-    if created:
-        group, _ = Group.objects.get_or_create(name='Participant')
+
+@receiver(post_save, sender=User)
+def assign_default_role(sender, instance, created, **kwargs):
+    if created and not instance.groups.exists():
+        group, _ = Group.objects.get_or_create(name="Participant")
         instance.groups.add(group)
-        # No need to call instance.save() here
