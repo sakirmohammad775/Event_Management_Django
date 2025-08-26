@@ -7,6 +7,8 @@ from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import date
 from users.decorators import group_required
+from django.contrib.auth.models import User
+
 
 def home(request):
     return render(request, 'home.html')
@@ -16,16 +18,16 @@ def home(request):
 
 def organizer_dashboard(request):
     today = timezone.now().date()
+    user = request.user  # Organizer
 
-    # Stats
-    total_events = Event.objects.count()
-    total_participants = RSVP.objects.count()
-    upcoming_events = Event.objects.filter(date__gt=today).count()
-    past_events = Event.objects.filter(date__lt=today).count()
-    todays_events = Event.objects.filter(date=today)
+    # ✅ Filter only events created by this organizer
+    events = Event.objects.filter(organizer=user).select_related('category')
 
-    # ✅ All events (no filtering by user)
-    events = Event.objects.select_related('category').all()
+    total_events = events.count()
+    total_participants = RSVP.objects.filter(event__in=events).count()
+    upcoming_events = events.filter(date__gt=today).count()
+    past_events = events.filter(date__lt=today).count()
+    todays_events = events.filter(date=today)
 
     context = {
         'total_events': total_events,
@@ -33,31 +35,39 @@ def organizer_dashboard(request):
         'upcoming_events': upcoming_events,
         'past_events': past_events,
         'todays_events': todays_events,
-        'events': events,   # Must pass events here
+        'events': events,
     }
     return render(request, 'dashboard/organizer_dashboard.html', context)
 
 
 def participant_dashboard(request):
     user = request.user
-    rsvped_events = Event.objects.filter(rsvp__user=user)
+    upcoming_rsvps = Event.objects.filter(rsvp__user=user, date__gte=timezone.now())
+    past_rsvps = Event.objects.filter(rsvp__user=user, date__lt=timezone.now())
+
     context = {
-        'rsvped_events': rsvped_events
+        'upcoming_rsvps': upcoming_rsvps,
+        'past_rsvps': past_rsvps,
     }
     return render(request, 'dashboard/participant_dashboard.html', context)
+
 
 def admin_dashboard(request):
     total_events = Event.objects.count()
     total_participants = RSVP.objects.count()
     upcoming_events = Event.objects.filter(date__gte=timezone.now()).count()
     past_events = Event.objects.filter(date__lt=timezone.now()).count()
+    users = User.objects.select_related().prefetch_related('groups').all()
+
     context = {
         "total_events": total_events,
         "total_participants": total_participants,
         "upcoming_events": upcoming_events,
         "past_events": past_events,
+        "users": users,  # For user management table
     }
     return render(request, "dashboard/admin_dashboard.html", context)
+
 
 
 #### Event Views

@@ -109,8 +109,12 @@ def redirect_dashboard(request):
         return redirect('admin-dashboard')
     elif user.groups.filter(name='Organizer').exists():
         return redirect('organizer-dashboard')
-    else:
+    elif user.groups.filter(name='Participant').exists():
         return redirect('participant-dashboard')
+    else:
+        messages.info(request, "Please activate your account first")
+        return redirect('login')
+
 
 
 # ----------------------------

@@ -12,9 +12,9 @@
 
     {# Navigation Bar #}
     {% if request.user.is_authenticated %}
-      {% include "logged_nav.html" %}
+      {% include "nav/logged_nav.html" %}
     {% else %}
-      {% include "non_logged_nav.html" %}
+      {% include "nav/non_logged_nav.html" %}
     {% endif %}
 
     {# Main Content Area #}
