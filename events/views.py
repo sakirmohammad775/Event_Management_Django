@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Category
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from datetime import date
 
 # ----------------------------
 # Helpers
@@ -23,12 +24,16 @@ def is_participant(user):
 # ----------------------------
 @user_passes_test(is_organizer, login_url='no-permission')
 def organizer_dashboard(request):
-    events = Event.objects.filter(organizer=request.user).select_related('category').prefetch_related('participants')
+    events = Event.objects.filter(
+        organizer=request.user
+    ).select_related('category').prefetch_related('participants')
+
     total_events = events.count()
-    upcoming_events = events.filter(date__gte=datetime.date.today()).count()
-    past_events = events.filter(date__lt=datetime.date.today()).count()
+    upcoming_events = events.filter(date__gte=date.today()).count()
+    past_events = events.filter(date__lt=date.today()).count()
     total_participants = RSVP.objects.filter(event__organizer=request.user).count()
-    today_events = events.filter(date=datetime.date.today())
+    today_events = events.filter(date=date.today())
+
     context = {
         'events': events,
         'total_events': total_events,
@@ -37,7 +42,7 @@ def organizer_dashboard(request):
         'total_participants': total_participants,
         'today_events': today_events,
     }
-    return render(request, 'events/dashboard/organizer_dashboard.html', context)
+    return render(request, 'dashboard/organizer_dashboard.html', context)
 
 
 # ----------------------------
