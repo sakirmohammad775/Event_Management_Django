@@ -22,12 +22,7 @@ def home(request):
 #     events = Event.objects.all().order_by('date')
 #     return render(request, 'home.html',{'events':events})
 
-def about(request):
-    return render(request, 'about.html')
 
-
-def contact(request):
-    return render(request, 'contact.html')
 
 def no_permission(request):
     return render(request, 'no_permission.html')

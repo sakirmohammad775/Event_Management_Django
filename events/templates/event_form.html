@@ -1,28 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ title }}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 min-h-screen">
+{% extends "base.html" %}
+{% block content %}
+<div class="w-1/2 mx-auto my-8">
+  <h2 class="text-2xl font-bold mb-4">Create Event</h2>
 
-  <header class="bg-white shadow p-4 mb-6">
-    <h1 class="text-2xl font-bold">{{ title }}</h1>
-  </header>
-
-  <div class="max-w-md mx-auto px-4">
-    <div class="bg-white p-6 rounded shadow">
-      <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="w-full mt-4 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Save
-        </button>
-      </form>
-    </div>
-  </div>
-
-</body>
-</html>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
+      Save Event
+    </button>
+  </form>
+</div>
+{% endblock %}

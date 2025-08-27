@@ -4,43 +4,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Event Manager{% endblock title %}</title>
+    <title>{% block title %}Event Management{% endblock title %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
   </head>
   <body class="font-sans bg-gray-100">
-
-    {# Navigation Bar #}
+    
     {% if request.user.is_authenticated %}
-      {% include "nav/logged_nav.html" %}
+       {% include "logged_nav.html" %}
     {% else %}
-      {% include "nav/non_logged_nav.html" %}
+       {% include "non_logged_nav.html" %}
     {% endif %}
 
-    {# Main Content Area #}
-    <main class="container mx-auto px-4 py-6">
-      {% block content %}
-      {% endblock content %}
+    <main>
+      {% block content %}{% endblock content %}
     </main>
 
-
-
-    
-    {# Footer #}
-    <footer class="bg-gray-800 text-white py-12 mt-10">
+    <footer class="bg-gray-800 text-white py-12 mt-12">
       <div class="container mx-auto px-6">
         <div class="flex flex-wrap justify-between">
           <div class="w-full md:w-1/4 mb-8 md:mb-0">
-            <h3 class="text-lg font-semibold mb-4">EventManager</h3>
-            <p class="text-gray-400">Organize, manage, and join events effortlessly.</p>
+            <h3 class="text-lg font-semibold mb-4">Event Manager</h3>
+            <p class="text-gray-400">Manage and RSVP to events efficiently.</p>
           </div>
           <div class="w-full md:w-1/4 mb-8 md:mb-0">
             <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
             <ul class="text-gray-400 space-y-2">
               <li><a href="{% url 'home' %}" class="hover:text-white">Home</a></li>
-              <li><a href="" class="hover:text-white">Browse Events</a></li>
-              <li><a href="" class="hover:text-white">Create Event</a></li>
-              <li><a href="{% url 'contact' %}" class="hover:text-white">Contact</a></li>
+              <li><a href="" class="hover:text-white">Events</a></li>
+              <li><a href="" class="hover:text-white">Categories</a></li>
+              <li><a href="{% url 'dashboard' %}" class="hover:text-white">Dashboard</a></li>
             </ul>
           </div>
           <div class="w-full md:w-1/4 mb-8 md:mb-0">
@@ -54,34 +47,26 @@
           <div class="w-full md:w-1/4">
             <h4 class="text-lg font-semibold mb-4">Newsletter</h4>
             <form class="flex">
-              <input type="email" placeholder="Your email"
-                     class="w-full px-3 py-2 text-gray-700 bg-gray-200 rounded-l-md focus:outline-none" required />
-              <button type="submit"
-                      class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300">
-                Subscribe
-              </button>
+              <input type="email" placeholder="Your email" class="w-full px-3 py-2 text-gray-700 bg-gray-200 rounded-l-md focus:outline-none" required>
+              <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300">Subscribe</button>
             </form>
           </div>
         </div>
         <div class="border-t border-gray-700 mt-12 pt-8 text-sm text-center text-gray-400">
-          &copy; 2025 EventManager. All rights reserved.
+          &copy; 2025 Event Management. All rights reserved.
         </div>
       </div>
     </footer>
 
-    {# JavaScript #}
     <script>
-      // Mobile menu toggle
       document.getElementById("menu-toggle")?.addEventListener("click", function () {
-        document.getElementById("mobile-menu").classList.toggle("hidden");
+          document.getElementById("mobile-menu").classList.toggle("hidden");
       });
 
-      // User dropdown menu toggle
       document.getElementById("user-menu-button")?.addEventListener("click", function () {
-        document.getElementById("user-menu").classList.toggle("hidden");
+          document.getElementById("user-menu").classList.toggle("hidden");
       });
 
-      // Close dropdown if clicked outside
       window.addEventListener("click", function (e) {
         if (!document.getElementById("user-menu-button")?.contains(e.target)) {
           document.getElementById("user-menu")?.classList.add("hidden");
