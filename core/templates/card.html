@@ -16,7 +16,7 @@
           <p class="text-sm text-gray-500 mb-4">
             <strong>Category:</strong> {{ event.category.name }}
           </p>
-          <a href="" 
+          <a href="{% url 'event-detail' event.id%}" 
              class="inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
              View Details
           </a>

@@ -1,79 +1,111 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Event Management{% endblock title %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'css/output.css' %}">
-  </head>
-  <body class="font-sans bg-gray-100">
-    
-    {% if request.user.is_authenticated %}
-       {% include "logged_nav.html" %}
-    {% else %}
-       {% include "non_logged_nav.html" %}
-    {% endif %}
 
-    <main>
-      {% block content %}
-      
-      {% endblock content %}
-    </main>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Event Management{% endblock title %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
 
-    <footer class="bg-gray-800 text-white py-12 mt-12">
-      <div class="container mx-auto px-6">
-        <div class="flex flex-wrap justify-between">
-          <div class="w-full md:w-1/4 mb-8 md:mb-0">
-            <h3 class="text-lg font-semibold mb-4">Event Manager</h3>
-            <p class="text-gray-400">Manage and RSVP to events efficiently.</p>
-          </div>
-          <div class="w-full md:w-1/4 mb-8 md:mb-0">
-            <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
-            <ul class="text-gray-400 space-y-2">
-              <li><a href="{% url 'home' %}" class="hover:text-white">Home</a></li>
-              <li><a href="" class="hover:text-white">Events</a></li>
-              <li><a href="" class="hover:text-white">Categories</a></li>
-              <li><a href="{% url 'dashboard' %}" class="hover:text-white">Dashboard</a></li>
-            </ul>
-          </div>
-          <div class="w-full md:w-1/4 mb-8 md:mb-0">
-            <h4 class="text-lg font-semibold mb-4">Connect</h4>
-            <ul class="text-gray-400 space-y-2">
-              <li><a href="#" class="hover:text-white">Twitter</a></li>
-              <li><a href="#" class="hover:text-white">LinkedIn</a></li>
-              <li><a href="#" class="hover:text-white">Facebook</a></li>
-            </ul>
-          </div>
-          <div class="w-full md:w-1/4">
-            <h4 class="text-lg font-semibold mb-4">Newsletter</h4>
-            <form class="flex">
-              <input type="email" placeholder="Your email" class="w-full px-3 py-2 text-gray-700 bg-gray-200 rounded-l-md focus:outline-none" required>
-              <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300">Subscribe</button>
-            </form>
+<body class="font-sans bg-gray-100">
+
+  {% if request.user.is_authenticated %}
+  {% include "logged_nav.html" %}
+  {% else %}
+  {% include "non_logged_nav.html" %}
+  {% endif %}
+
+  <main>
+    {% block content %}
+
+    {% endblock content %}
+  </main>
+
+  <footer class="bg-gray-900 text-gray-300 py-12">
+    <div class="container mx-auto px-6">
+      <!-- Top Section -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+        <!-- Brand -->
+        <div>
+          <h3 class="text-2xl font-bold text-white mb-4">Event Flow</h3>
+          <p class="text-gray-400">
+            Plan, manage, and join events with ease. Making every moment memorable.
+          </p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="text-lg font-semibold text-white mb-4">Quick Links</h4>
+          <ul class="space-y-3">
+            <li><a href="{% url 'home' %}" class="hover:text-blue-400 transition">Home</a></li>
+            <li><a href="" class="hover:text-blue-400 transition">Events</a></li>
+            <li><a href="" class="hover:text-blue-400 transition">Categories</a></li>
+            <li><a href="{% url 'dashboard' %}" class="hover:text-blue-400 transition">Dashboard</a></li>
+          </ul>
+        </div>
+
+        <!-- Social Media -->
+        <div>
+          <h4 class="text-lg font-semibold text-white mb-4">Follow Us</h4>
+          <div class="flex space-x-4">
+            <a href="#"
+              class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-full hover:bg-blue-600 transition">
+              <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#"
+              class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-full hover:bg-sky-500 transition">
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#"
+              class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-full hover:bg-pink-500 transition">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#"
+              class="w-10 h-10 flex items-center justify-center bg-gray-800 rounded-full hover:bg-blue-700 transition">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
           </div>
         </div>
-        <div class="border-t border-gray-700 mt-12 pt-8 text-sm text-center text-gray-400">
-          &copy; 2025 Event Management. All rights reserved.
+
+        <!-- Newsletter -->
+        <div>
+          <h4 class="text-lg font-semibold text-white mb-4">Stay Updated</h4>
+          <form class="flex flex-col sm:flex-row">
+            <input type="email" placeholder="Enter your email"
+              class="w-full px-4 py-2 mb-3 sm:mb-0 sm:mr-2 rounded-md text-gray-900 focus:outline-none">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-md text-white transition">
+              Subscribe
+            </button>
+          </form>
         </div>
       </div>
-    </footer>
 
-    <script>
-      document.getElementById("menu-toggle")?.addEventListener("click", function () {
-          document.getElementById("mobile-menu").classList.toggle("hidden");
-      });
+      <!-- Bottom Section -->
+      <div class="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-500">
+        © 2025 Event Management. All rights reserved.
+      </div>
+    </div>
+  </footer>
 
-      document.getElementById("user-menu-button")?.addEventListener("click", function () {
-          document.getElementById("user-menu").classList.toggle("hidden");
-      });
+  <script>
+    document.getElementById("menu-toggle")?.addEventListener("click", function () {
+      document.getElementById("mobile-menu").classList.toggle("hidden");
+    });
 
-      window.addEventListener("click", function (e) {
-        if (!document.getElementById("user-menu-button")?.contains(e.target)) {
-          document.getElementById("user-menu")?.classList.add("hidden");
-        }
-      });
-    </script>
-  </body>
+    document.getElementById("user-menu-button")?.addEventListener("click", function () {
+      document.getElementById("user-menu").classList.toggle("hidden");
+    });
+
+    window.addEventListener("click", function (e) {
+      if (!document.getElementById("user-menu-button")?.contains(e.target)) {
+        document.getElementById("user-menu")?.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+
 </html>

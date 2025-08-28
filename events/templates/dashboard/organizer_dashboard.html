@@ -12,7 +12,8 @@
                 <th class="px-4 py-3 w-[15%] text-center">Category</th>
                 <th class="px-4 py-3 w-[30%] text-center">Organizer</th>
                 <th class="px-4 py-3 w-[20%] text-center">Date</th>
-            </tr>
+            </tr>  
+
         </thead>
         <tbody class="divide-y divide-gray-100">
             {% for event in events %}
@@ -21,8 +22,9 @@
                 <td class="px-4 py-4 flex items-center gap-2 text-left">
                     <div class="w-2 h-2 rounded-full bg-green-500"></div>
                     <a href="{% url 'event-detail' event.id %}">{{ event.name }}</a>
-                    <a href="{% url 'update_event' event.id %}" class="px-2 py-1 bg-green-500">Edit</a>
-                    <form action='{% url "delete_event" event.id %}' method='POST'>
+                   <a href="{% url 'event-update' event.id %}" class="px-2 py-1 bg-green-500 text-white rounded">Edit</a>
+
+                    <form action='' method='POST'>
                         {% csrf_token %}
                         <button type='submit' class="px-2 py-1 bg-red-500">Delete</button>
                     </form>
@@ -35,4 +37,5 @@
         </tbody>
     </table>
 </div>
+
 {% endblock content %}

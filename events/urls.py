@@ -4,8 +4,12 @@ from . import views
 urlpatterns = [
     # Public
     path("", views.event_list, name="event-list"),
-    path("events/<int:pk>/", views.event_detail, name="event-detail"),
+    path("events/<int:event_id>/", views.event_details, name="event-detail"),
 
+   # Dashboards
+    path("dashboard/participant/", views.participant_dashboard, name="participant-dashboard"),
+    path("dashboard/organizer/", views.organizer_dashboard, name="organizer-dashboard"),
+    
     # Category (Admin only)
      # Categories
     path("categories/", views.category_list, name="category-list"),
@@ -15,15 +19,11 @@ urlpatterns = [
 
      # Events
     path("", views.event_list, name="event-list"),
-    path("<int:pk>/", views.event_detail, name="event-detail"),
-    path("add/", views.event_create, name="event-create"),
+    path("events/add/", views.create_event, name="event-create"),
     path("<int:pk>/edit/", views.event_update, name="event-update"),
     path("<int:pk>/delete/", views.event_delete, name="event-delete"),
 
-    # Dashboards
     
-    path("dashboard/participant/", views.participant_dashboard, name="participant-dashboard"),
-    path("dashboard/organizer/", views.organizer_dashboard, name="organizer-dashboard"),
 ]
 
 

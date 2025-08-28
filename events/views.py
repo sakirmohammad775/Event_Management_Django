@@ -74,11 +74,10 @@ def event_list(request):
 # ----------------------------
 # Event Detail
 # ----------------------------
-@login_required
-def event_detail(request, event_id):
-    event = get_object_or_404(Event.objects.select_related('category').prefetch_related('participants'), id=event_id)
-    participants = event.participants.all()
-    return render(request, 'events/event_detail.html', {'event': event, 'participants': participants})
+
+def event_details(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    return render(request, "event_details.html", {"event": event})
 
 
 # ----------------------------
@@ -199,30 +198,32 @@ def event_delete(request, pk):
 @user_passes_test(is_admin_or_organizer, login_url="login")
 def event_update(request, pk):
     event = get_object_or_404(Event, pk=pk)
+
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event)
+        form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             form.save()
-            messages.success(request, "Event updated successfully!")
-            return redirect("event-list")
+            return redirect("organizer-dashboard")  # change to your dashboard url name
     else:
         form = EventForm(instance=event)
-    return render(request, "events/event_form.html", {"form": form, "event": event})
+
+    return render(request, "event_form.html", {"form": form})
 
 @login_required
 @user_passes_test(is_admin_or_organizer, login_url="login")
-def event_create(request):
+def create_event(request):
     if request.method == "POST":
-        form = EventForm(request.POST)
+        form = EventForm(request.POST, request.FILES)
         if form.is_valid():
             event = form.save(commit=False)
-            event.organizer = request.user  # assuming Event has organizer FK
+            event.organizer = request.user  # logged-in user as organizer
             event.save()
             messages.success(request, "Event created successfully!")
-            return redirect("event-list")
+            return redirect("organizer-dashboard")
     else:
         form = EventForm()
-    return render(request, "events/event_form.html", {"form": form})
+    
+    return render(request, "event_create.html", {"form": form})
 # --- Event CRUD ---
 @login_required
 def event_list(request):

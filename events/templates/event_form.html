@@ -1,14 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="w-1/2 mx-auto my-8">
-  <h2 class="text-2xl font-bold mb-4">Create Event</h2>
-
-  <form method="POST">
+<div class="max-w-lg mx-auto bg-white shadow p-6 rounded">
+  <h2 class="text-xl font-bold mb-4">Edit Event</h2>
+  <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
-      Save Event
-    </button>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
   </form>
 </div>
 {% endblock %}
