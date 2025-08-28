@@ -11,7 +11,8 @@ from django.http import HttpResponse
 
 from .forms import AssignRoleForm
 from events.models import Category   # ✅ for category_list
-
+from events.models import Event
+from django.utils.timezone import now
 
 # ----------------------------
 # Helper: Admin check
@@ -20,9 +21,8 @@ def is_admin(user):
     return user.is_superuser or user.groups.filter(name='Admin').exists()
 
 
-# ----------------------------
 # Signup with Email Activation
-# ----------------------------
+
 def signup_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -56,9 +56,8 @@ def signup_view(request):
     return render(request, 'registration/signup.html')
 
 
-# ----------------------------
 # Activate Account
-# ----------------------------
+
 def activate_user(request, user_id, token):
     user = get_object_or_404(User, id=user_id)
     if default_token_generator.check_token(user, token):
@@ -94,21 +93,6 @@ def logout_view(request):
     return redirect('login')
 
 
-# ----------------------------
-# Role-based Redirection
-# ----------------------------
-@login_required
-def redirect_dashboard(request):
-    user = request.user
-    if is_admin(user):
-        return redirect('admin-dashboard')
-    elif user.groups.filter(name='Organizer').exists():
-        return redirect('organizer-dashboard')
-    elif user.groups.filter(name='Participant').exists():
-        return redirect('participant-dashboard')
-    else:
-        messages.info(request, "Please ask admin to assign a role.")
-        return redirect('login')
 
 
 # ----------------------------
@@ -128,7 +112,21 @@ def admin_dashboard(request):
         else:
             user.group_name = "No Group Assigned"
 
-    return render(request, "admin/dashboard.html", {"users": users})
+     # === Stats ===
+    total_organizers = User.objects.filter(groups__name="Organizer").count()
+    total_participants = User.objects.filter(groups__name="Participant").count()
+    total_events = Event.objects.count()
+    total_past_events = Event.objects.filter(date__lt=now()).count()
+
+    context = {
+        "users": users,
+        "total_organizers": total_organizers,
+        "total_events": total_events,
+        "total_participants": total_participants,
+        "total_past_events": total_past_events,
+    }
+    return render(request, "admin/dashboard.html", context)
+
 
 # ----------------------------
 # Assign Role to User
@@ -207,3 +205,4 @@ def redirect_dashboard(request):
     else:
         messages.info(request, "Please activate your account or ask admin to assign a role.")
         return redirect('login')
+
