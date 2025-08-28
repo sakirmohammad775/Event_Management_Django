@@ -8,21 +8,17 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from django.db.models import Prefetch
 from django.http import HttpResponse
-
 from .forms import AssignRoleForm
-from events.models import Category   # ✅ for category_list
+from events.models import Category 
 from events.models import Event
 from django.utils.timezone import now
 
-# ----------------------------
-# Helper: Admin check
-# ----------------------------
+
 def is_admin(user):
     return user.is_superuser or user.groups.filter(name='Admin').exists()
 
 
 # Signup with Email Activation
-
 def signup_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -55,21 +51,8 @@ def signup_view(request):
 
     return render(request, 'registration/signup.html')
 
-
-# Activate Account
-
-def activate_user(request, user_id, token):
-    user = get_object_or_404(User, id=user_id)
-    if default_token_generator.check_token(user, token):
-        user.is_active = True
-        user.save()
-        return redirect("login")
-    return HttpResponse("Activation link is invalid or expired.")
-
-
-# ----------------------------
 # Login
-# ----------------------------
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -82,30 +65,33 @@ def login_view(request):
             messages.error(request, "Invalid credentials or inactive account.")
     return render(request, 'registration/login.html')
 
-
-# ----------------------------
 # Logout
-# ----------------------------
+
 @login_required
 def logout_view(request):
     logout(request)
     messages.success(request, "You have logged out.")
     return redirect('login')
 
+# Activate Account
+
+def activate_user(request, user_id, token):
+    user = get_object_or_404(User, id=user_id)
+    if default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return redirect("login")
+    return HttpResponse("Activation link is invalid or expired.")
 
 
-
-# ----------------------------
 # Admin Dashboard
-# ----------------------------
+
 @user_passes_test(is_admin, login_url='no-permission')
 def admin_dashboard(request):
-    # Prefetch groups for efficiency
     users = User.objects.prefetch_related(
         Prefetch('groups', queryset=Group.objects.all(), to_attr='all_groups')
     ).all()
 
-    # Add a readable group name field
     for user in users:
         if user.all_groups:
             user.group_name = user.all_groups[0].name
@@ -128,9 +114,6 @@ def admin_dashboard(request):
     return render(request, "admin/dashboard.html", context)
 
 
-# ----------------------------
-# Assign Role to User
-# ----------------------------
 @user_passes_test(is_admin, login_url='login')
 def assign_role(request, user_id):
     user = get_object_or_404(User, id=user_id)
@@ -145,9 +128,8 @@ def assign_role(request, user_id):
     return render(request, 'admin/assign_role.html', {'form': form, 'user': user})
 
 
-# ----------------------------
+
 # Create Group
-# ----------------------------
 @user_passes_test(is_admin, login_url='login')
 def create_group(request):
     if request.method == 'POST':
@@ -162,18 +144,11 @@ def create_group(request):
     return render(request, 'admin/create_group.html')
 
 
-# ----------------------------
-# List Groups
-# ----------------------------
 @user_passes_test(is_admin, login_url='login')
 def group_list(request):
     groups = Group.objects.all().prefetch_related('permissions')
     return render(request, 'admin/group_list.html', {'groups': groups})
 
-
-# ----------------------------
-# List Users
-# ----------------------------
 @user_passes_test(is_admin, login_url='login')
 def user_list(request):
     users = User.objects.prefetch_related(
@@ -184,9 +159,6 @@ def user_list(request):
     return render(request, 'admin/user_list.html', {'users': users})
 
 
-# ----------------------------
-# Category List (Admin only)
-# ----------------------------
 @user_passes_test(is_admin, login_url='login')
 def category_list(request):
     categories = Category.objects.all()
