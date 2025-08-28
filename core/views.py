@@ -4,8 +4,8 @@ from events.models import Event
 
 # in your home view
 def home(request):
-  return render(request,'home.html')
-
+  events = Event.objects.all().order_by('-date')  # or filter upcoming events
+  return render(request, 'home.html', {'events': events})
 
 
 def no_permission(request):
