@@ -1,9 +1,9 @@
 # users/urls.py
 from django.urls import path
 from . import views
+from users.views import ProfileView
+urlpatterns = [ 
 
-urlpatterns = [
-    # auth
     path('signup/', views.signup_view, name='signup'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -24,4 +24,6 @@ urlpatterns = [
 
     # (optionally) categories listing via users admin area (if you prefer)
     # path('admin/categories/', views.category_list, name='category-list'),
+    
+    path('profile/',ProfileView.as_view(template_name='accounts/profile.html'))
 ]

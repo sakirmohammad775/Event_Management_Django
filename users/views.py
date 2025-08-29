@@ -12,6 +12,7 @@ from .forms import AssignRoleForm
 from events.models import Category 
 from events.models import Event
 from django.utils.timezone import now
+from django.views.generic import TemplateView
 
 
 def is_admin(user):
@@ -178,3 +179,20 @@ def redirect_dashboard(request):
         messages.info(request, "Please activate your account or ask admin to assign a role.")
         return redirect('login')
 
+
+###Profile
+class ProfileView(TemplateView):
+    template_name='accounts/profile.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        context['username'] = user.username
+        context['email'] = user.email
+        context['name'] = user.get_full_name()
+
+        context['member_since'] = user.date_joined
+        context['last_login'] = user.last_login
+        return context
+
+   

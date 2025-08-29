@@ -1,9 +1,17 @@
 from django.urls import path
 from . import views
+from .views import (
+    EventListView,
+    CategoryListView,
+    CategoryCreateView,
+    CategoryUpdateView,
+    CategoryDeleteView,
+    # keep other FBVs as-is
+)
 
 urlpatterns = [
     # Public
-    path("", views.event_list, name="event-list"),
+    # path("", views.event_list, name="event-list"),
     path("events/<int:event_id>/", views.event_details, name="event-detail"),
 
    # Dashboards
@@ -23,7 +31,12 @@ urlpatterns = [
     path("<int:pk>/edit/", views.event_update, name="event-update"),
     path("<int:pk>/delete/", views.event_delete, name="event-delete"),
 
-    
+    ###Class based->
+    path("", EventListView.as_view(), name="event-list"),
+    path("categories/", CategoryListView.as_view(), name="category-list"),
+    path("categories/add/", CategoryCreateView.as_view(), name="category-create"),
+    path("categories/<int:pk>/edit/", CategoryUpdateView.as_view(), name="category-update"),
+    path("categories/<int:pk>/delete/", CategoryDeleteView.as_view(), name="category-delete"),
 ]
 
 

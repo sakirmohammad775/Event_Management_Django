@@ -282,3 +282,96 @@ def category_delete(request, pk):
         messages.success(request, "Category deleted successfully!")
         return redirect("category-list")
     return render(request, "events/category_confirm_delete.html", {"category": category})
+
+
+
+
+
+
+
+
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
+##Class based views.....
+# ----------------------------
+# Event List (CBV)
+# ----------------------------
+class EventListView(LoginRequiredMixin, ListView):
+    model = Event
+    template_name = 'events/event_list.html'
+    context_object_name = 'events'
+
+    def get_queryset(self):
+        queryset = Event.objects.select_related('category', 'organizer').all()
+        category_id = self.request.GET.get('category')
+        search = self.request.GET.get('search')
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+        if search:
+            queryset = queryset.filter(name__icontains=search)
+        return queryset
+
+
+# ----------------------------
+# Category List (CBV)
+# ----------------------------
+class CategoryListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Category
+    template_name = 'events/category_list.html'
+    context_object_name = 'categories'
+
+    def test_func(self):
+        return is_admin_or_organizer(self.request.user)
+
+
+# ----------------------------
+# Category Create (CBV)
+# ----------------------------
+class CategoryCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'events/category_form.html'
+    success_url = reverse_lazy('category-list')
+
+    def test_func(self):
+        return is_admin_or_organizer(self.request.user)
+
+    def form_valid(self, form):
+        messages.success(self.request, "Category created successfully!")
+        return super().form_valid(form)
+
+
+# ----------------------------
+# Category Update (CBV)
+# ----------------------------
+class CategoryUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Category
+    form_class = CategoryForm
+    template_name = 'events/category_form.html'
+    success_url = reverse_lazy('category-list')
+
+    def test_func(self):
+        return is_admin_or_organizer(self.request.user)
+
+    def form_valid(self, form):
+        messages.success(self.request, "Category updated successfully!")
+        return super().form_valid(form)
+
+
+# ----------------------------
+# Category Delete (CBV)
+# ----------------------------
+
+class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Category
+    template_name = 'events/category_confirm_delete.html'
+    success_url = reverse_lazy('category-list')
+
+    def test_func(self):
+        return is_admin_or_organizer(self.request.user)
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Category deleted successfully!")
+        return super().delete(request, *args, **kwargs)
