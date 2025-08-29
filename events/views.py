@@ -8,6 +8,9 @@ from .models import Category
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from datetime import date
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 def is_admin_or_organizer(user):
     return user.is_superuser or user.groups.filter(name__in=['Admin', 'Organizer']).exists()
@@ -23,7 +26,7 @@ def is_participant(user):
 @user_passes_test(is_organizer, login_url='no-permission')
 def organizer_dashboard(request):
     events = Event.objects.filter(
-        organizer=request.user
+        organizer=request.user 
     ).select_related('category').prefetch_related('participants')
 
     total_events = events.count()
@@ -225,17 +228,6 @@ def category_delete(request, pk):
         return redirect("category-list")
     return render(request, "events/category_confirm_delete.html", {"category": category})
 
-<<<<<<< HEAD
-
-
-
-
-
-
-
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 ##Class based views.....
 # ----------------------------
@@ -318,7 +310,6 @@ class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Category deleted successfully!")
         return super().delete(request, *args, **kwargs)
-=======
 # List Categories
 @login_required
 @user_passes_test(is_admin_or_organizer, login_url='login')
@@ -345,4 +336,3 @@ def category_update(request, pk):
             messages.error(request, "Category name cannot be empty.")
 
     return render(request, 'events/category_form.html', {'category': category})
->>>>>>> 606bb80488b5898a8bd960ab1251a893918d9928
