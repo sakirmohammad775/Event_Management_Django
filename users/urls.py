@@ -2,6 +2,7 @@
 from django.urls import path
 from . import views
 from users.views import ProfileView
+from django.contrib.auth.views import PasswordChangeDoneView,PasswordChangeView
 urlpatterns = [ 
 
     path('signup/', views.signup_view, name='signup'),
@@ -25,5 +26,18 @@ urlpatterns = [
     # (optionally) categories listing via users admin area (if you prefer)
     # path('admin/categories/', views.category_list, name='category-list'),
     
-    path('profile/',ProfileView.as_view(template_name='accounts/profile.html'))
+    path('profile/',ProfileView.as_view(),name='profile'),
+     path(
+        'password-change/',
+        PasswordChangeView.as_view(template_name='accounts/password_change.html'),
+        name='password_change'
+    ),
+
+    path(
+        'password-change/done/',
+        PasswordChangeDoneView.as_view(template_name='accounts/password_change_done.html'),
+        name='password_change_done'
+    ),
+
+
 ]

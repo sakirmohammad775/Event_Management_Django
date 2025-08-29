@@ -9,9 +9,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from datetime import date
 
-# ----------------------------
-# Helpers
-# ----------------------------
+def is_admin_or_organizer(user):
+    return user.is_superuser or user.groups.filter(name__in=['Admin', 'Organizer']).exists()
+
 def is_organizer(user):
     return user.groups.filter(name='Organizer').exists()
 
@@ -19,9 +19,7 @@ def is_participant(user):
     return user.groups.filter(name='Participant').exists()
 
 
-# ----------------------------
 # Organizer Dashboard
-# ----------------------------
 @user_passes_test(is_organizer, login_url='no-permission')
 def organizer_dashboard(request):
     events = Event.objects.filter(
@@ -44,20 +42,14 @@ def organizer_dashboard(request):
     }
     return render(request, 'dashboard/organizer_dashboard.html', context)
 
-
-# ----------------------------
 # Participant Dashboard
-# ----------------------------
 @user_passes_test(is_participant, login_url='no-permission')
 def participant_dashboard(request):
     rsvps = RSVP.objects.filter(user=request.user).select_related('event', 'event__category')
     events = [rsvp.event for rsvp in rsvps]
     return render(request, 'dashboard/participant_dashboard.html', {'events': events})
 
-
-# ----------------------------
 # Event List (all users)
-# ----------------------------
 @login_required
 def event_list(request):
     events = Event.objects.select_related('category').annotate(rsvp_count=Count('participants'))
@@ -70,26 +62,18 @@ def event_list(request):
         events = events.filter(name__icontains=search)
     return render(request, 'events/event_list.html', {'events': events})
 
-
-# ----------------------------
 # Event Detail
-# ----------------------------
-
 def event_details(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     return render(request, "event_details.html", {"event": event})
 
-
-# ----------------------------
 # Create / Update Event
-# ----------------------------
 @user_passes_test(is_organizer, login_url='no-permission')
 def event_form(request, event_id=None):
     if event_id:
         event = get_object_or_404(Event, id=event_id, organizer=request.user)
     else:
         event = None
-
     if request.method == 'POST':
         name = request.POST['name']
         description = request.POST['description']
@@ -98,7 +82,6 @@ def event_form(request, event_id=None):
         location = request.POST['location']
         category_id = request.POST['category']
         image = request.FILES.get('image')
-
         category = get_object_or_404(Category, id=category_id)
         if event:
             # Update
@@ -126,14 +109,10 @@ def event_form(request, event_id=None):
             )
             messages.success(request, "Event created")
         return redirect('organizer-dashboard')
-
     categories = Category.objects.all()
     return render(request, 'events/event_form.html', {'event': event, 'categories': categories})
 
-
-# ----------------------------
 # RSVP to Event
-# ----------------------------
 @user_passes_test(is_participant, login_url='no-permission')
 def rsvp_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
@@ -145,44 +124,7 @@ def rsvp_event(request, event_id):
     return redirect('participant-dashboard')
 
 
-# ----------------------------
-# Helper: Organizer/Admin check
-# ----------------------------
-def is_admin_or_organizer(user):
-    return user.is_superuser or user.groups.filter(name__in=['Admin', 'Organizer']).exists()
-
-
-# ----------------------------
-# List Categories
-# ----------------------------
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='login')
-def category_list(request):
-    categories = Category.objects.all()
-    return render(request, 'events/category_list.html', {'categories': categories})
-
-
-# ----------------------------
-# Add Category
-# ----------------------------
-@login_required
-@user_passes_test(is_admin_or_organizer, login_url='login')
-def category_update(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-
-    if request.method == "POST":
-        name = request.POST.get("name")
-        description = request.POST.get("description")
-        if name:
-            category.name = name
-            category.description = description
-            category.save()
-            messages.success(request, f"Category '{name}' updated successfully!")
-            return redirect('category-list')
-        else:
-            messages.error(request, "Category name cannot be empty.")
-
-    return render(request, 'events/category_form.html', {'category': category})
+#Event Delete
 @login_required
 @user_passes_test(is_admin_or_organizer, login_url="login")
 def event_delete(request, pk):
@@ -193,7 +135,7 @@ def event_delete(request, pk):
         return redirect("event-list")
     return render(request, "events/event_confirm_delete.html", {"event": event})
 
-
+#Event Update
 @login_required
 @user_passes_test(is_admin_or_organizer, login_url="login")
 def event_update(request, pk):
@@ -283,6 +225,7 @@ def category_delete(request, pk):
         return redirect("category-list")
     return render(request, "events/category_confirm_delete.html", {"category": category})
 
+<<<<<<< HEAD
 
 
 
@@ -375,3 +318,31 @@ class CategoryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(self.request, "Category deleted successfully!")
         return super().delete(request, *args, **kwargs)
+=======
+# List Categories
+@login_required
+@user_passes_test(is_admin_or_organizer, login_url='login')
+def category_list(request):
+    categories = Category.objects.all()
+    return render(request, 'events/category_list.html', {'categories': categories})
+
+# Add Category
+@login_required
+@user_passes_test(is_admin_or_organizer, login_url='login')
+def category_update(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        if name:
+            category.name = name
+            category.description = description
+            category.save()
+            messages.success(request, f"Category '{name}' updated successfully!")
+            return redirect('category-list')
+        else:
+            messages.error(request, "Category name cannot be empty.")
+
+    return render(request, 'events/category_form.html', {'category': category})
+>>>>>>> 606bb80488b5898a8bd960ab1251a893918d9928

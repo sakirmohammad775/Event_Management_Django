@@ -156,3 +156,4 @@ FRONTEND_URL ='http://127.0.0.1:8000'
 # ----------------------------
 LOGIN_URL = '/'
 LOGIN_REDIRECT_URL='/events/dashboard/'
+LOGOUT_REDIRECT_URL='/'
